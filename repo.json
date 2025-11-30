@@ -1,0 +1,8 @@
+{
+  "name": "MyRepo AI",
+  "description": "CloudStream extensions by hcgn2005-ai",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/hcgn2005-ai/myrepo-ai/builds/plugins.json"
+  ]
+}
