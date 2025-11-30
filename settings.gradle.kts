@@ -1,9 +1,9 @@
 pluginManagement {
     repositories {
-        maven { url = uri("https://repo.recloudstream.org/releases") }
         gradlePluginPortal()
         google()
         mavenCentral()
+        maven { url = uri("https://recloudstream.github.io/gradle/") }
     }
 }
 
