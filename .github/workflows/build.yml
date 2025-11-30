@@ -1,0 +1,68 @@
+name: Build CloudStream plugins
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Make Gradle executable
+        run: chmod +x gradlew
+
+      - name: Build all plugins
+        run: ./gradlew make
+
+      - name: Prepare builds branch
+        run: |
+          git fetch origin builds || echo "No builds branch yet"
+          git checkout -B builds origin/builds || git checkout -B builds
+          rm -rf plugins
+          mkdir -p plugins
+
+      - name: Copy build artifacts
+        run: |
+          find . -name "*.cs3" -print -exec cp {} plugins/ \;
+
+      - name: Generate plugins.json
+        run: |
+          PLUGINS=$(ls plugins/*.cs3 2>/dev/null | sed 's#.*/##')
+          echo '{ "name": "MyRepo AI plugins", "plugins": [' > plugins.json
+          FIRST=1
+          for FILE in $PLUGINS; do
+            if [ $FIRST -eq 0 ]; then
+              echo ',' >> plugins.json
+            fi
+            FIRST=0
+            NAME="${FILE%.cs3}"
+            echo "  {\"name\": \"${NAME}\", \"id\": \"${NAME}\", \"version\": 1," >> plugins.json
+            echo "   \"url\": \"https://github.com/hcgn2005-ai/myrepo-ai/raw/builds/plugins/${FILE}\"," >> plugins.json
+            echo "   \"langs\": [\"en\"], \"tvTypes\": [\"Anime\"] }" >> plugins.json
+          done
+          echo ']}' >> plugins.json
+
+      - name: Commit and push builds
+        run: |
+          cp plugins.json .
+          git add plugins plugins.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update builds" || echo "No changes to commit"
+          git push origin HEAD:builds
