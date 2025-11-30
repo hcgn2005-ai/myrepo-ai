@@ -22,6 +22,7 @@ allprojects {
         google()
         mavenCentral()
         maven("https://jitpack.io")
+        maven("https://github.com/recloudstream/cloudstream/raw/master")  // add this
     }
 }
 
