@@ -11,61 +11,61 @@ jobs:
       contents: write
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
 
-    - name: Verify gradlew exists
-      run: |
-        if [ ! -f "gradlew" ]; then
-          echo "❌ gradlew missing! Run 'gradle wrapper' locally first."
-          exit 1
-        fi
-        ls -la gradlew*
+      - name: Verify gradlew exists
+        run: ls -la gradlew*
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-    - name: Make gradlew executable
-      run: chmod +x gradlew
+      - name: Make gradlew executable
+        run: chmod +x gradlew
 
-    - name: Build plugins
-      run: ./gradlew make --stacktrace --no-daemon
+      # IMPORTANT: build while still on main (where wrapper files are)
+      - name: Build plugins on main
+        run: ./gradlew make --stacktrace --no-daemon
 
-    - name: List generated .cs3 files
-      run: find . -name "*.cs3" || echo "No .cs3 files found!"
+      - name: List generated .cs3 files
+        run: find . -name "*.cs3" || echo "No .cs3 files found"
 
-    - name: Deploy to builds branch
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        
-        git fetch origin builds || true
-        git checkout -B builds origin/builds || git checkout -B builds
-        
-        rm -rf plugins || true
-        mkdir -p plugins
-        
-        find .. -name "*.cs3" -exec cp {} plugins/ \; || echo "No plugins copied"
-        
-        # Generate plugins.json
-        if ls plugins/*.cs3 >/dev/null 2>&1; then
-          echo '{ "name": "MyRepo AI", "plugins": [' > plugins.json
-          FIRST=true
-          for file in plugins/*.cs3; do
-            if [ "$FIRST" = false ]; then echo "," >> plugins.json; fi
-            FIRST=false
-            name=$(basename "$file" .cs3)
-            echo "{\"name\":\"$name\",\"id\":\"$name\",\"version\":1,\"url\":\"https://github.com/hcgn2005-ai/myrepo-ai/raw/builds/plugins/$name.cs3\",\"langs\":[\"en\"],\"tvTypes\":[\"Anime\"]}" >> plugins.json
-          done
-          echo ']}' >> plugins.json
-          cp plugins.json .
-        else
-          echo "No plugins found, skipping plugins.json"
-        fi
-        
-        git add -A
-        git commit -m "Update builds $(date)" || echo "No changes"
-        git push origin HEAD:builds || echo "Push failed"
+      - name: Switch/create builds branch
+        run: |
+          git fetch origin builds || true
+          git checkout -B builds origin/builds || git checkout -B builds
+
+      - name: Copy build artifacts into builds branch
+        run: |
+          rm -rf plugins
+          mkdir -p plugins
+          find .. -name "*.cs3" -exec cp {} plugins/ \; || echo "No plugins to copy"
+
+      - name: Generate plugins.json
+        run: |
+          if ls plugins/*.cs3 >/dev/null 2>&1; then
+            echo '{ "name": "MyRepo AI plugins", "plugins": [' > plugins.json
+            FIRST=true
+            for file in plugins/*.cs3; do
+              if [ "$FIRST" = false ]; then echo "," >> plugins.json; fi
+              FIRST=false
+              name=$(basename "$file" .cs3)
+              echo "{\"name\":\"$name\",\"id\":\"$name\",\"version\":1,\"url\":\"https://github.com/hcgn2005-ai/myrepo-ai/raw/builds/plugins/$name.cs3\",\"langs\":[\"en\"],\"tvTypes\":[\"Anime\"]}" >> plugins.json
+            done
+            echo ']}' >> plugins.json
+          else
+            echo '{ "name": "MyRepo AI plugins", "plugins": [] }' > plugins.json
+          fi
+
+      - name: Commit and push builds
+        run: |
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update builds" || echo "No changes to commit"
+          git push origin HEAD:builds || echo "Push failed"
