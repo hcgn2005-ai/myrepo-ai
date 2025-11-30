@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - master
-  pull_request:
 
 jobs:
   build:
@@ -28,7 +27,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build all plugins
-        run: ./gradlew make
+        run: ./gradlew make --stacktrace
 
       - name: Prepare builds branch
         run: |
@@ -39,7 +38,7 @@ jobs:
 
       - name: Copy build artifacts
         run: |
-          find . -name "*.cs3" -print -exec cp {} plugins/ \;
+          find .. -name "*.cs3" -print -exec cp {} plugins/ \;
 
       - name: Generate plugins.json
         run: |
@@ -60,7 +59,6 @@ jobs:
 
       - name: Commit and push builds
         run: |
-          cp plugins.json .
           git add plugins plugins.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
