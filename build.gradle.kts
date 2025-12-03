@@ -69,17 +69,17 @@ subprojects {
     }
 
     dependencies {
-    val implementation by configurations
+        val implementation by configurations
 
-    // Only this CloudStream runtime is needed for plugins
-    implementation("com.github.recloudstream.cloudstream:library-jvm:master")
-    implementation(kotlin("stdlib"))
-    implementation("com.github.Blatzar:NiceHttp:0.4.11")
-    implementation("org.jsoup:jsoup:1.18.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-}
-
+        implementation("com.github.recloudstream.cloudstream:library-jvm:master")
+        implementation(kotlin("stdlib"))
+        implementation("com.github.Blatzar:NiceHttp:0.4.11")
+        implementation("org.jsoup:jsoup:1.18.3")
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
+    }
+} // <-- this closes subprojects
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
