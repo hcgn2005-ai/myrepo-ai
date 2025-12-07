@@ -8,13 +8,12 @@ buildscript {
         google()
         mavenCentral()
         maven("https://jitpack.io")
-        maven("https://github.com/recloudstream/cloudstream/raw/master")
     }
 
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.3")
-        classpath("com.github.recloudstream:gradle:-SNAPSHOT")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
+        classpath("com.github.recloudstream:gradle:0.1.0") // Stable version
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0") // Make sure Kotlin version is correct
     }
 }
 
@@ -23,15 +22,8 @@ allprojects {
         google()
         mavenCentral()
         maven("https://jitpack.io")
-        maven("https://github.com/recloudstream/cloudstream/raw/master")
     }
 }
-
-fun Project.cloudstream(configuration: CloudstreamExtension.() -> Unit) =
-    extensions.getByName<CloudstreamExtension>("cloudstream").configuration()
-
-fun Project.android(configuration: BaseExtension.() -> Unit) =
-    extensions.getByName<BaseExtension>("android").configuration()
 
 subprojects {
     apply(plugin = "com.android.library")
@@ -67,15 +59,12 @@ subprojects {
             }
         }
     }
-dependencies {
-    implementation("com.github.recloudstream.cloudstream:library-jvm:0.1.1") // stable release version
-    implementation(kotlin("stdlib"))
-    implementation("com.github.Blatzar:NiceHttp:0.4.11")
-    implementation("org.jsoup:jsoup:1.18.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-   }
-}
 
-tasks.register<Delete>("clean") {
-    delete(rootProject.layout.buildDirectory)
+    dependencies {
+        implementation("com.github.recloudstream.cloudstream:library-jvm:0.1.1")  // Stable version
+        implementation(kotlin("stdlib"))
+        implementation("com.github.Blatzar:NiceHttp:0.4.11")
+        implementation("org.jsoup:jsoup:1.18.3")
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
+    }
 }
