@@ -67,17 +67,13 @@ subprojects {
             }
         }
     }
-
-    dependencies {
-        val implementation by configurations
-
-        // This is exactly what official extensions use
-        implementation("com.github.recloudstream.cloudstream:library-jvm:master")
-        implementation(kotlin("stdlib"))
-        implementation("com.github.Blatzar:NiceHttp:0.4.11")
-        implementation("org.jsoup:jsoup:1.18.3")
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-    }
+dependencies {
+    implementation("com.github.recloudstream.cloudstream:library-jvm:0.1.1") // stable release version
+    implementation(kotlin("stdlib"))
+    implementation("com.github.Blatzar:NiceHttp:0.4.11")
+    implementation("org.jsoup:jsoup:1.18.3")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
+   }
 }
 
 tasks.register<Delete>("clean") {
